@@ -6,17 +6,26 @@ paddleLeft=50
 scoreLeft=0
 scoreRight=0
 paddleRight=50
-ballx=50
-bally=50
-speedx=1
-speedy=1
+paddleLen=3
+ballX=50
+ballY=50
+speedX=1
+speedY=1
 
 update() {
 	echo hi
 }
 
 render() {
-	echo ho
+	# left paddle 
+	tput setab 7
+	for (( pX=$paddleLeft; pX < $(($paddleLeft+$paddleLen)); pX++ ))
+	do
+		#tput cup 0 $pX
+		echo "$pX"
+	done
+
+	tput setab 0
 }
 
 main() {
