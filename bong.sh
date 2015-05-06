@@ -3,13 +3,10 @@ trap "stty $(stty -g)" EXIT
 tput civis -- invisible
 stty -echo -icanon -icrnl time 0 min 0
 
-width=100
-height=30
-
 top=5
 bottom=29
 left=10
-right=99
+right=109
 
 paddleLeft=$((top+(bottom-top)/2))
 paddleRight=$((top+(bottom-top)/2))
@@ -36,11 +33,10 @@ iterationOld=0
 
 run=1
 
+laststatus=""
 
 status() {
-	local y=$((lines - 1))
-	tput cup $y 0
-	echo $1
+	laststatus=$1
 }
 
 update() {
@@ -48,7 +44,7 @@ update() {
 	echo $key
 	
 	if [ "$key" = "q" ]; then
-		run = 0
+		run=0
 	fi
 		
 	if [ $ballY -eq $top ]; then
@@ -67,18 +63,22 @@ update() {
 		else
 			status "Left wall"
 			score1=$((++score1))
-			gameOver=1
+				#gameOver=1
 			winner=1
+			speedX=1
+			ballX=$((left+(right-left)/2))
 		fi
-	elif [ $ballX -eq $width ]; then
+	elif [ $ballX -eq $right ]; then
 		if [ $ballY -lt $paddleRight ] && [ $ballY -gt $((paddleRight + paddleLen)) ]; then
 			status "Right paddle"
 			speedX=-1
 		else
 			status "Right wall"
 			score2=$((++score2))
-			gameOver=1
+			#gameOver=1
 			winner=0
+			speedX=-1
+			ballX=$((left+(right-left)/2))
 		fi
 	fi
 	
@@ -91,30 +91,14 @@ update() {
 }
 
 render() {
-	# score
-	tput setab 0
-        tput setaf 2
-	tput cup 2 33
-	echo $score1
-	tput cup 2 66
-	echo $score2
-	
-	# corners
-	tput setab 6
-	tput cup $top $left
-	echo " "
-	tput cup $top $right
-	echo " "
-	tput cup $bottom $left
-	echo " "
-	tput cup $bottom $right
-	echo " "
-
 	# update color
 	if [ $iteration -ge $((iterationOld+10)) ]; then
 		iterationOld=$iteration
-		paddleColor=$(((paddleColor+1)%6+1))
+		paddleColor=$((++paddleColor))
+		[ $paddleColor -ge 8 ] && paddleColor=1
 	fi
+
+	buffer=$(
 
 	# left paddle 
 	tput setab $paddleColor
@@ -123,18 +107,53 @@ render() {
 		tput cup $pY $left
 		echo " "
 	done
-	
+
 	# right paddle 
-	for (( pY=$paddleLeft; pY < $((paddleLeft+paddleLen)); pY++ ))
+	for (( pY=$paddleRight; pY < $((paddleRight+paddleLen)); pY++ ))
 	do
 		tput cup $pY $right
 		echo " "
 	done
 
 	# ball
-	tput setab 3
+	tput setab 1
 	tput cup $ballY $ballX
 	echo " "
+
+	# score
+	tput setab 0
+	tput setaf 2
+	tput cup 2 40
+	echo $score1
+	tput cup 2 80
+	echo $score2
+
+	tput setab 6
+	# corners
+	for (( borderY=$((top-1)); borderY <= $((bottom+1)); borderY++ )); do
+		if [ $borderY -eq $((top-1)) ] || [ $borderY -eq $((bottom+1)) ]; then
+			for (( borderX=$left; borderX <= $right; borderX++ )); do
+				tput cup $borderY $borderX
+				echo " "
+			done
+		fi
+		tput cup $borderY $((left-1))
+		echo " "
+		tput cup $borderY $((right+1))
+		echo " "
+	done
+
+	# show status
+	tput setab 3
+	tput setaf 0
+	tput cup $((lines-3)) 0
+	echo $laststatus
+
+	) # end buffer
+
+	tput setab 0
+	tput clear
+	echo "$buffer"
 }
 
 main() {
@@ -143,13 +162,8 @@ main() {
 		update
 		render
 		let iteration=iteration+1
-		sleep 0.1
-	
-		tput setab 0
-		tput clear
+		#sleep 0.1
 	done;
 }
 
-
 main
-tput cnorm -- normal
