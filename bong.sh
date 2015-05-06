@@ -1,23 +1,22 @@
 tput clear
-tput cup 2 2
-echo X
 
-paddleLeft=50
+paddleLeft=20
 scoreLeft=0
 scoreRight=0
-paddleRight=50
-ballX=50
-ballY=50
+paddleRight=20
+paddleLen=3
+ballX=0
+ballY=0
 speedX=1
 speedY=1
 
-width=50
-height=50
+width=100
+height=30
 
 top=0
-bottom=49
+bottom=29
 left=0
-right=49
+right=99
 
 score1=0
 score2=0
@@ -63,7 +62,25 @@ update() {
 }
 
 render() {
-	echo ho
+	# left paddle 
+	tput setab 7
+	for (( pX=$paddleLeft; pX < $(($paddleLeft+$paddleLen)); pX++ ))
+	do
+		tput cup $pX 0
+		echo "$pX"
+	done
+	
+	# right paddle 
+	tput setab 7
+	for (( pX=$paddleLeft; pX < $(($paddleLeft+$paddleLen)); pX++ ))
+	do
+		tput cup $pX $right
+		echo "$pX"
+	done
+
+
+
+        tput setab 0
 }
 
 main() {
