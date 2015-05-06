@@ -10,6 +10,9 @@ ballY=0
 speedX=1
 speedY=1
 
+lines=$(tput lines)
+cols=$(tput cols)
+
 width=100
 height=30
 
@@ -24,34 +27,38 @@ score2=0
 gameOver=0
 winner=0
 
+status() {
+	local y=$((lines - 1))
+	tput cup 0 $y
+	echo $1
+}
+
 update() {
-	# Test whether ball collides with wall
-	if [ $ballX -eq $left ]; then
-		speedX=1
-		((score1++))
-	elif [ $ballX -eq $right ]; then
-		speedX=-1
-		((score2++))
-	fi
-	
+		
 	if [ $ballY -eq $top ]; then
+		status "Top wall"
 		speedY=1
 	elif [ $ballY -eq $bottom ]; then
+		status "Bottom wall"
 		speedY=-1
 	fi
 
 	# Test whether somebody loses
 	if [ $ballX -eq $left ]; then
 		if [ $ballY -lt $paddleLeft ] && [ $ballY -gt $((paddleLeft + paddleLen)) ]; then
+			status "Left paddle"
 			speedX=1
 		else
+			status "Left wall"
 			gameOver=1
 			winner=1
 		fi
 	elif [ $ballX -eq $width ]; then
 		if [ $ballY -lt $paddleRight ] && [ $ballY -gt $((paddleRight + paddleLen)) ]; then
+			status "Right paddle"
 			speedX=-1
 		else
+			status "Right wall"
 			gameOver=1
 			winner=0
 		fi
