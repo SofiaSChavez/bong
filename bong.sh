@@ -19,6 +19,9 @@ bottom=49
 left=0
 right=49
 
+score1=0
+score2=0
+
 gameOver=0
 winner=0
 
@@ -26,8 +29,10 @@ update() {
 	# Test whether ball collides with wall
 	if [ $ballX -eq $left ]; then
 		speedX=1
-	#else if [ $ballX -eq $right ]; then
+		((score1++))
+	elif [ $ballX -eq $right ]; then
 		speedX=-1
+		((score2++))
 	fi
 	
 	if [ $ballY -eq $top ]; then
@@ -36,13 +41,21 @@ update() {
 		speedY=-1
 	fi
 
-	# Test whether Player 1 loses
+	# Test whether somebody loses
 	if [ $ballX -eq $left ]; then
-		gameOver=1
-		winner=1
+		if [ $ballY -lt $paddleLeft ] && [ $ballY -gt $((paddleLeft + paddleLen)) ]; then
+			speedX=1
+		else
+			gameOver=1
+			winner=1
+		fi
 	elif [ $ballX -eq $width ]; then
-		gameOver=1
-		winner=0
+		if [ $ballY -lt $paddleRight ] && [ $ballY -gt $((paddleRight + paddleLen)) ]; then
+			speedX=-1
+		else
+			gameOver=1
+			winner=0
+		fi
 	fi
 	
 	let ballX=ballX+speedX
