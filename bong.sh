@@ -57,7 +57,7 @@ update() {
 
 	# Test whether somebody loses
 	if [ $ballX -eq $left ]; then
-		if [ $ballY -lt $paddleLeft ] && [ $ballY -gt $((paddleLeft + paddleLen)) ]; then
+		if [ $ballY -gt $paddleLeft ] && [ $ballY -lt $((paddleLeft + paddleLen)) ]; then
 			status "Left paddle"
 			speedX=1
 		else
@@ -69,7 +69,7 @@ update() {
 			ballX=$((left+(right-left)/2))
 		fi
 	elif [ $ballX -eq $right ]; then
-		if [ $ballY -lt $paddleRight ] && [ $ballY -gt $((paddleRight + paddleLen)) ]; then
+		if [ $ballY -gt $paddleRight ] && [ $ballY -lt $((paddleRight + paddleLen)) ]; then
 			status "Right paddle"
 			speedX=-1
 		else
