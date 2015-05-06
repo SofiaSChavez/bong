@@ -1,15 +1,18 @@
-tput clear
+tput civis -- invisible
 
 paddleLeft=20
 scoreLeft=0
 scoreRight=0
 paddleRight=20
 paddleLen=3
-paddleColor=0
+paddleColor=1
 ballX=0
 ballY=0
 speedX=1
 speedY=1
+
+lines=$(tput lines)
+cols=$(tput cols)
 
 width=100
 height=30
@@ -19,6 +22,9 @@ bottom=29
 left=0
 right=99
 
+score1=0
+score2=0
+
 gameOver=0
 winner=0
 
@@ -26,29 +32,41 @@ iteration=0
 iterationOld=0
 
 
-
+status() {
+	local y=$((lines - 1))
+	tput cup $y 0
+	echo $1
+}
 
 update() {
-	# Test whether ball collides with wall
-	if [ $ballX -eq $left ]; then
-		speedX=1
-	#else if [ $ballX -eq $right ]; then
-		speedX=-1
-	fi
-	
+		
 	if [ $ballY -eq $top ]; then
+		status "Top wall"
 		speedY=1
 	elif [ $ballY -eq $bottom ]; then
+		status "Bottom wall"
 		speedY=-1
 	fi
 
-	# Test whether Player 1 loses
+	# Test whether somebody loses
 	if [ $ballX -eq $left ]; then
-		gameOver=1
-		winner=1
+		if [ $ballY -lt $paddleLeft ] && [ $ballY -gt $((paddleLeft + paddleLen)) ]; then
+			status "Left paddle"
+			speedX=1
+		else
+			status "Left wall"
+			gameOver=1
+			winner=1
+		fi
 	elif [ $ballX -eq $width ]; then
-		gameOver=1
-		winner=0
+		if [ $ballY -lt $paddleRight ] && [ $ballY -gt $((paddleRight + paddleLen)) ]; then
+			status "Right paddle"
+			speedX=-1
+		else
+			status "Right wall"
+			gameOver=1
+			winner=0
+		fi
 	fi
 	
 	let ballX=ballX+speedX
@@ -56,33 +74,33 @@ update() {
 }
 
 render() {
-	
+	tput clear
+
 	# update color
 	if [ $iteration -ge $((iterationOld+10)) ]; then
 		iterationOld=$iteration
-		paddleColor=$(((paddleColor+1)%7))
+		paddleColor=$(((paddleColor+1)%6+1))
 	fi
 
 	# left paddle 
 	tput setab $paddleColor
-	for (( pX=$paddleLeft; pX < $((paddleLeft+paddleLen)); pX++ ))
+	for (( pY=$paddleLeft; pY < $((paddleLeft+paddleLen)); pY++ ))
 	do
-		tput cup $pX 0
+		tput cup $pY 0
 		echo " "
 	done
 	
 	# right paddle 
-	tput setab 7
-	for (( pX=$paddleLeft; pX < $((paddleLeft+paddleLen)); pX++ ))
+	for (( pY=$paddleLeft; pY < $((paddleLeft+paddleLen)); pY++ ))
 	do
-		tput cup $pX $right
+		tput cup $pY $right
 		echo " "
 	done
 
 	# ball
 	tput setab 3
-	echo $ballX $ballY
-	#tput cup $ballX $ballY
+	#echo $ballX $ballY
+	tput cup $ballY $ballX
 	echo " "
 
         tput setab 0
@@ -93,9 +111,9 @@ main() {
 		update
 		render
 		let iteration=iteration+1
-		echo $iteration
-		sleep 0.5
+		sleep 0.1
 	done;
 }
 
 main
+tput cnorm -- normal
