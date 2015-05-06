@@ -1,4 +1,7 @@
+trap "stty $(stty -g)" EXIT
+
 tput civis -- invisible
+stty -echo -icanon -icrnl time 0 min 0
 
 width=100
 height=30
@@ -31,6 +34,8 @@ winner=0
 iteration=0
 iterationOld=0
 
+run=1
+
 
 status() {
 	local y=$((lines - 1))
@@ -39,6 +44,12 @@ status() {
 }
 
 update() {
+	local key=$(cat -v)
+	echo $key
+	
+	if [ "$key" = "q" ]; then
+		run = 0
+	fi
 		
 	if [ $ballY -eq $top ]; then
 		status "Top wall"
@@ -55,6 +66,7 @@ update() {
 			speedX=1
 		else
 			status "Left wall"
+			score1=$((++score1))
 			gameOver=1
 			winner=1
 		fi
@@ -64,18 +76,29 @@ update() {
 			speedX=-1
 		else
 			status "Right wall"
+			score2=$((++score2))
 			gameOver=1
 			winner=0
 		fi
 	fi
 	
-	let ballX=ballX+speedX
-	let ballY=ballY+speedY
+	if [ $gameOver -eq 1 ]; then
+		status "Game Over"
+	else
+		let ballX=ballX+speedX
+		let ballY=ballY+speedY
+	fi
 }
 
 render() {
-	tput clear
-
+	# score
+	tput setab 0
+        tput setaf 2
+	tput cup 2 33
+	echo $score1
+	tput cup 2 66
+	echo $score2
+	
 	# corners
 	tput setab 6
 	tput cup $top $left
@@ -112,23 +135,21 @@ render() {
 	tput setab 3
 	tput cup $ballY $ballX
 	echo " "
-
-	tput setab 0
-        tput setaf 2
-	tput cup 2 33
-	echo $score1
-	tput cup 2 66
-	echo $score2
 }
 
 main() {
-	while(true); do
+
+	while [ $run -eq 1 ]; do
 		update
 		render
 		let iteration=iteration+1
 		sleep 0.1
+	
+		tput setab 0
+		tput clear
 	done;
 }
+
 
 main
 tput cnorm -- normal
