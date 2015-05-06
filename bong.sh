@@ -1,26 +1,26 @@
 tput civis -- invisible
 
-paddleLeft=20
+width=100
+height=30
+
+top=5
+bottom=29
+left=10
+right=99
+
+paddleLeft=$((top+(bottom-top)/2))
+paddleRight=$((top+(bottom-top)/2))
+paddleColor=1
+paddleLen=3
 scoreLeft=0
 scoreRight=0
-paddleRight=20
-paddleLen=3
-paddleColor=1
-ballX=0
-ballY=0
+ballX=$((left+(right-left)/2))
+ballY=$((top+(bottom-top)/2))
 speedX=1
 speedY=1
 
 lines=$(tput lines)
 cols=$(tput cols)
-
-width=100
-height=30
-
-top=0
-bottom=29
-left=0
-right=99
 
 score1=0
 score2=0
@@ -76,6 +76,17 @@ update() {
 render() {
 	tput clear
 
+	# corners
+	tput setab 6
+	tput cup $top $left
+	echo " "
+	tput cup $top $right
+	echo " "
+	tput cup $bottom $left
+	echo " "
+	tput cup $bottom $right
+	echo " "
+
 	# update color
 	if [ $iteration -ge $((iterationOld+10)) ]; then
 		iterationOld=$iteration
@@ -86,7 +97,7 @@ render() {
 	tput setab $paddleColor
 	for (( pY=$paddleLeft; pY < $((paddleLeft+paddleLen)); pY++ ))
 	do
-		tput cup $pY 0
+		tput cup $pY $left
 		echo " "
 	done
 	
@@ -99,11 +110,15 @@ render() {
 
 	# ball
 	tput setab 3
-	#echo $ballX $ballY
 	tput cup $ballY $ballX
 	echo " "
 
-        tput setab 0
+	tput setab 0
+        tput setaf 2
+	tput cup 2 33
+	echo $score1
+	tput cup 2 66
+	echo $score2
 }
 
 main() {
