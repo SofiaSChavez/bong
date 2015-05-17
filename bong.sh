@@ -1,3 +1,5 @@
+#!/bin/bash
+
 trap "stty $(stty -g)" EXIT
 stty -echo -icanon -icrnl time 0 min 0
 
@@ -39,11 +41,23 @@ status() {
 
 update() {
 	local key=$(cat -v)
-	echo -n $key
+	#echo -n $key
 
-	if [ "$key" = "q" ]; then
+	if [ "$key" == "q" ]; then
 		run=0
 	fi
+
+	local dy=0
+
+	if [ "$key" == *"^[[A"* ]; then
+		dy=$((dy-1))
+	fi
+
+	if [ "$key" == *"^[[B"* ]; then
+		dy=$((dy+1))
+	fi
+
+	paddleLeft=$((paddleLeft+dy))
 
 	if [ $ballY -eq $top ]; then
 		status "Top wall"
