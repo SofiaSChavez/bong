@@ -22,11 +22,10 @@ speedY=1
 lines=$(tput lines)
 cols=$(tput cols)
 
-score1=0
-score2=0
+scoreLeft=0
+scoreRight=0
 
 gameOver=0
-winner=0
 
 iteration=0
 iterationOld=0
@@ -49,11 +48,11 @@ update() {
 
 	local dy=0
 
-	if [ "$key" == *"^[[A"* ]; then
+	if [ "$key" == "^[[A" ]; then
 		dy=$((dy-1))
 	fi
 
-	if [ "$key" == *"^[[B"* ]; then
+	if [ "$key" == "^[[B" ]; then
 		dy=$((dy+1))
 	fi
 
@@ -74,9 +73,7 @@ update() {
 			speedX=1
 		else
 			status "Left wall"
-			score1=$((++score1))
-				#gameOver=1
-			winner=1
+			scoreRight=$((++scoreRight))
 			speedX=1
 			ballX=$((left+(right-left)/2))
 		fi
@@ -86,9 +83,7 @@ update() {
 			speedX=-1
 		else
 			status "Right wall"
-			score2=$((++score2))
-			#gameOver=1
-			winner=0
+			scoreLeft=$((++scoreLeft))
 			speedX=-1
 			ballX=$((left+(right-left)/2))
 		fi
@@ -147,8 +142,8 @@ render() {
 		# score
 		tput setab 0
 		tput setaf 2
-		echoXY 2 40 $score1
-		echoXY 2 80 $score2
+		echoXY 2 40 $scoreLeft
+		echoXY 2 80 $scoreRight
 
 		# corners
 		tput setab 6
